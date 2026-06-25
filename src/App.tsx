@@ -14,7 +14,7 @@ async function verifyPassword(input: string): Promise<boolean> {
   return hash === PASSWORD_HASH;
 }
 
-function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
+function PasswordGate({ onUnlock, onClose }: { onUnlock: () => void; onClose: () => void }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
 
@@ -31,7 +31,14 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-xl bg-[#1a1a18] p-6 text-white">
+      <form onSubmit={handleSubmit} className="relative flex flex-col gap-4 rounded-xl bg-[#1a1a18] p-6 text-white">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition hover:bg-[#2E2E2A] hover:text-white"
+        >
+          ✕
+        </button>
         <h2 className="text-center text-xl font-bold" style={{ fontFamily: 'Manjari, sans-serif' }}>
           Enter password to edit
         </h2>
@@ -105,7 +112,7 @@ export function App() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-black">
       {showGate && !unlocked && (
-        <PasswordGate onUnlock={() => { setUnlocked(true); setShowGate(false); }} />
+        <PasswordGate onUnlock={() => { setUnlocked(true); setShowGate(false); }} onClose={() => setShowGate(false)} />
       )}
       <div className="relative flex w-full flex-col items-center justify-center gap-1 px-2.5 py-6 lg:flex-row lg:items-start">
         {unlocked && (
