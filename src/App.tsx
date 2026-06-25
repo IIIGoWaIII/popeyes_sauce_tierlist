@@ -31,7 +31,7 @@ function PasswordGate({ onUnlock, onClose }: { onUnlock: () => void; onClose: ()
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <form onSubmit={handleSubmit} className="relative flex flex-col gap-4 rounded-xl bg-[#1a1a18] p-6 text-white">
+      <form onSubmit={handleSubmit} className="relative flex flex-col gap-4 rounded-xl bg-[#1a1a18] p-6 pr-10 text-white">
         <button
           type="button"
           onClick={onClose}
