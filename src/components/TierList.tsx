@@ -31,9 +31,9 @@ export type Tier = {
   items: Item[];
 };
 
-function SortableItemCard({ item }: { item: Item }) {
+function SortableItemCard({ item, enabled, onAttemptEdit }: { item: Item; enabled: boolean; onAttemptEdit?: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: item.id });
+    useSortable({ id: item.id, disabled: !enabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -46,9 +46,10 @@ function SortableItemCard({ item }: { item: Item }) {
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className="flex cursor-grab flex-col items-center gap-1.5 rounded-[11px] bg-[#2E2E2A] p-1 pb-2 select-none active:cursor-grabbing"
+      {...(enabled ? { ...attributes, ...listeners } : { onClick: onAttemptEdit })}
+      className={`flex flex-col items-center gap-1.5 rounded-[11px] bg-[#2E2E2A] p-1 pb-2 select-none ${
+        enabled ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
+      }`}
     >
       <img
         src={item.image}
@@ -66,9 +67,10 @@ function SortableItemCard({ item }: { item: Item }) {
   );
 }
 
-function TierRow({ tier, tierIndex }: { tier: Tier; tierIndex: number }) {
+function TierRow({ tier, tierIndex, enabled, onAttemptEdit }: { tier: Tier; tierIndex: number; enabled: boolean; onAttemptEdit?: () => void }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `tier-${tierIndex}`,
+    disabled: !enabled,
   });
 
   return (
@@ -87,7 +89,7 @@ function TierRow({ tier, tierIndex }: { tier: Tier; tierIndex: number }) {
       <div
         ref={setNodeRef}
         className={`flex min-h-[112px] flex-1 flex-wrap items-center gap-2.5 px-2.5 py-2 transition-colors ${
-          isOver ? 'bg-[#2a2a26]' : 'bg-[#191917]'
+          isOver && enabled ? 'bg-[#2a2a26]' : 'bg-[#191917]'
         }`}
       >
         <SortableContext
@@ -95,7 +97,7 @@ function TierRow({ tier, tierIndex }: { tier: Tier; tierIndex: number }) {
           strategy={horizontalListSortingStrategy}
         >
           {tier.items.map((item) => (
-            <SortableItemCard key={item.id} item={item} />
+            <SortableItemCard key={item.id} item={item} enabled={enabled} onAttemptEdit={onAttemptEdit} />
           ))}
         </SortableContext>
       </div>
@@ -109,11 +111,13 @@ export function TierList({
   tiers,
   onDragEnd,
   enabled = true,
+  onAttemptEdit,
 }: {
   logo: string;
   logoAlt: string;
   tiers: Tier[];
   enabled?: boolean;
+  onAttemptEdit?: () => void;
   onDragEnd: (oldTierIndex: number, newTierIndex: number, oldIndex: number, newIndex: number) => void;
 }) {
   const [activeItem, setActiveItem] = React.useState<Item | null>(null);
@@ -184,7 +188,7 @@ export function TierList({
         onDragEnd={handleDragEnd}
       >
         {tiers.map((tier, idx) => (
-          <TierRow key={tier.label} tier={tier} tierIndex={idx} />
+          <TierRow key={tier.label} tier={tier} tierIndex={idx} enabled={enabled} onAttemptEdit={onAttemptEdit} />
         ))}
         <DragOverlay>
           {activeItem ? (

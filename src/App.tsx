@@ -5,7 +5,6 @@ import { TierList } from './components/TierList';
 import type { Tier } from './components/TierList';
 import { GOWA_LOGO, GOWA_DEFAULT, KATA_LOGO, KATA_DEFAULT } from './components/tierData';
 
-const LS_UNLOCKED = 'popeys-tierlist-unlocked';
 const PASSWORD_HASH = 'c558430e08e51699d45c06e879ad79f393ef665ba1e6e154463a7564ca201d00';
 
 async function verifyPassword(input: string): Promise<boolean> {
@@ -23,7 +22,6 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
     e.preventDefault();
     const ok = await verifyPassword(password);
     if (ok) {
-      localStorage.setItem(LS_UNLOCKED, '1');
       onUnlock();
     } else {
       setError(true);
@@ -58,9 +56,8 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
 }
 
 export function App() {
-  const [unlocked, setUnlocked] = useState(() => {
-    try { return localStorage.getItem(LS_UNLOCKED) === '1'; } catch { return false; }
-  });
+  const [unlocked, setUnlocked] = useState(false);
+  const [showGate, setShowGate] = useState(false);
 
   const data = useQuery(api.tierlist.get);
   const saveMutation = useMutation(api.tierlist.save);
@@ -101,16 +98,32 @@ export function App() {
     []
   );
 
+  const handleAttemptEdit = () => {
+    if (!unlocked) setShowGate(true);
+  };
+
   return (
-    <div className="min-h-screen w-full bg-black">
-      {!unlocked && <PasswordGate onUnlock={() => setUnlocked(true)} />}
-      <div className="flex w-full flex-col items-center justify-center gap-1 lg:flex-row lg:items-start">
+    <div className="flex min-h-screen w-full items-center justify-center bg-black">
+      {showGate && !unlocked && (
+        <PasswordGate onUnlock={() => { setUnlocked(true); setShowGate(false); }} />
+      )}
+      <div className="relative flex w-full flex-col items-center justify-center gap-1 px-2.5 py-6 lg:flex-row lg:items-start">
+        {unlocked && (
+          <button
+            onClick={() => { setUnlocked(false); setShowGate(false); }}
+            className="fixed right-4 top-4 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-[#2E2E2A] text-xl text-white transition hover:bg-[#BB5757]"
+            title="Lock tierlist"
+          >
+            ✕
+          </button>
+        )}
         <TierList
           logo={GOWA_LOGO}
           logoAlt="GoWa logo"
           tiers={gowa}
           enabled={unlocked}
           onDragEnd={handleDragEnd(setGowa)}
+          onAttemptEdit={handleAttemptEdit}
         />
         <TierList
           logo={KATA_LOGO}
@@ -118,6 +131,7 @@ export function App() {
           tiers={kata}
           enabled={unlocked}
           onDragEnd={handleDragEnd(setKata)}
+          onAttemptEdit={handleAttemptEdit}
         />
       </div>
     </div>
