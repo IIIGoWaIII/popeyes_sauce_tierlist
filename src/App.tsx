@@ -70,9 +70,11 @@ export function App() {
   const loaded = useState(false);
 
   useEffect(() => {
-    if (data) {
-      setGowa(data.gowa);
-      setKata(data.kata);
+    if (data !== undefined) {
+      if (data) {
+        setGowa(data.gowa);
+        setKata(data.kata);
+      }
       loaded[1](true);
     }
   }, [data]);

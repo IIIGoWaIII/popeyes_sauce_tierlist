@@ -3,8 +3,8 @@ import type { Tier } from './TierList';
 const IMG = (id: string) =>
 `https://cdn.magicpatterns.com/patterns/figma-images/XQjA9zKUQPuGYkKme2ErGD/${id}.png`;
 
-export const GOWA_LOGO = "/0-5.svg";
-export const KATA_LOGO = "/0-65.svg";
+export const GOWA_LOGO = `${import.meta.env.BASE_URL}0-5.svg`;
+export const KATA_LOGO = `${import.meta.env.BASE_URL}0-65.svg`;
 
 export const GOWA_DEFAULT: Tier[] = [
 {
